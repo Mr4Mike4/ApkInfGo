@@ -1,5 +1,5 @@
 # ApkInfGo
-Golang parser for android apk files
+Golang parser for android apk files. It extracts version information, package name, etc.
 
 ##Example
 ```go
