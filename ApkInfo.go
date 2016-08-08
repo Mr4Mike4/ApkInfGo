@@ -10,23 +10,31 @@ import (
 	"os"
 )
 type ApkInfoSt struct {
-	name string
-	versionCode uint32
-	versionName string
-	label string
-	icon string
-	sdkVersion uint16
-	targetSdkVersion uint16
-	fileSize int64
-	filePath string
+	Name string
+	VersionCode uint32
+	VersionName string
+	Label string
+	Icon string
+	SdkVersion uint16
+	TargetSdkVersion uint16
+	FileSize int64
+	FilePath string
+	Cert ApkCertSt
 }
 
 type Conf struct {
 	aapt string
+	cert *ConfCert
 }
 
 func ApkInfo(aaptApp string) *Conf {
-	c := &Conf{aapt:aaptApp}
+	c := &Conf{aapt:aaptApp, cert:nil}
+	return c
+}
+
+func (c *Conf) CertKeyTool(keytoolApp string) *Conf {
+	app := ApkCertificate(keytoolApp)
+	c.cert = app
 	return c
 }
 
@@ -38,7 +46,7 @@ func (c *Conf) File(apk string) *ApkInfoSt {
 	}
 	//log.Printf("apk file - %q\n", apk)
 	data := strings.Split(string(out), "\r\n")
-	info := ApkInfoSt{filePath:apk, fileSize:0}
+	info := ApkInfoSt{FilePath:apk, FileSize:0}
 	for _, s := range data{
 		arr := strings.Split(s, ":")
 		if len(arr) != 2 {
@@ -50,32 +58,35 @@ func (c *Conf) File(apk string) *ApkInfoSt {
 			//log.Printf("package - %q\n", arr[1])
 			re := regexp.MustCompile("name='([^']+)?' versionCode='(\\d*)?' versionName='([^']+)?'")
 			packageInfo := re.FindStringSubmatch(arr[1])
-			info.name = packageInfo[1]
-			info.versionName = packageInfo[3]
+			info.Name = packageInfo[1]
+			info.VersionName = packageInfo[3]
 			versionCode, _ := strconv.ParseUint(packageInfo[2], 0, 32)
-			info.versionCode = uint32(versionCode)
+			info.VersionCode = uint32(versionCode)
 			break
 		case "sdkVersion":
 			//log.Printf("sdkVersion - %q\n", arr[1])
 			sdkVersion, _ := strconv.ParseUint(strings.Trim(arr[1], "'"), 0, 16)
-			info.sdkVersion = uint16(sdkVersion)
+			info.SdkVersion = uint16(sdkVersion)
 			break
 		case "targetSdkVersion":
 			//log.Printf("targetSdkVersion - %q\n", arr[1])
 			targetSdkVersion, _ := strconv.ParseUint(strings.Trim(arr[1], "'"), 0, 16)
-			info.targetSdkVersion = uint16(targetSdkVersion)
+			info.TargetSdkVersion = uint16(targetSdkVersion)
 			break
 		case "application":
 			//log.Printf("application - %q\n", arr[1])
 			re2 := regexp.MustCompile("label='([^']+)?' icon='([^']+)?'")
 			d := re2.FindStringSubmatch(arr[1])
-			info.label = d[1]
-			info.icon = d[2]
+			info.Label = d[1]
+			info.Icon = d[2]
 			break
 		//default:
 		//	log.Printf("%q - %q\n", arr[0], arr[1])
 		//	break
 		}
+	}
+	if c.cert != nil {
+		info.Cert = *c.cert.File(apk)
 	}
 	return &info
 }
@@ -94,7 +105,7 @@ func (c *Conf) Folder(dirname string, recurcive bool) *[]ApkInfoSt {
 			dir := dirname + string(os.PathSeparator) + file.Name()
 			a := (c).File(dir)
 			if a != nil {
-				a.fileSize = file.Size()
+				a.FileSize = file.Size()
 				infoArr = append(infoArr, *a)
 			}
 		} else if file.IsDir() && recurcive {
