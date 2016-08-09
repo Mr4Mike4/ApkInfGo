@@ -39,6 +39,15 @@ func (c *Conf) CertKeyTool(keytoolApp string) *Conf {
 }
 
 func (c *Conf) File(apk string) *ApkInfoSt {
+	d := parse(c, apk)
+	if d != nil {
+		file, _ := os.Stat(apk)
+		d.FileSize = file.Size()
+	}
+	return d
+}
+
+func parse(c *Conf, apk string) *ApkInfoSt {
 	out, err := exec.Command(c.aapt, "dump", "badging", apk).Output()
 	if err != nil {
 		log.Printf("err: %q, file: %q", err, apk)
@@ -46,7 +55,7 @@ func (c *Conf) File(apk string) *ApkInfoSt {
 	}
 	//log.Printf("apk file - %q\n", apk)
 	data := strings.Split(string(out), "\r\n")
-	info := ApkInfoSt{FilePath:apk, FileSize:0}
+	info := ApkInfoSt{FilePath:apk}
 	for _, s := range data{
 		arr := strings.Split(s, ":")
 		if len(arr) != 2 {
@@ -103,7 +112,7 @@ func (c *Conf) Folder(dirname string, recurcive bool) *[]ApkInfoSt {
 	for _, file := range files {
 		if re.MatchString(file.Name()) {
 			dir := dirname + string(os.PathSeparator) + file.Name()
-			a := (c).File(dir)
+			a := parse(c, dir)
 			if a != nil {
 				a.FileSize = file.Size()
 				infoArr = append(infoArr, *a)
