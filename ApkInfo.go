@@ -54,7 +54,7 @@ func parse(c *Conf, apk string) *ApkInfoSt {
 		return nil
 	}
 	//log.Printf("apk file - %q\n", apk)
-	data := strings.Split(string(out), "\r\n")
+	data := strings.Split(string(out), "\n")
 	info := ApkInfoSt{FilePath:apk}
 	for _, s := range data{
 		arr := strings.Split(s, ":")
