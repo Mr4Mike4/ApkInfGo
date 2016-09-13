@@ -8,6 +8,8 @@ import (
 	"io/ioutil"
 	"strconv"
 	"os"
+	"runtime"
+	"fmt"
 )
 type ApkInfoSt struct {
 	Name string
@@ -48,6 +50,13 @@ func (c *Conf) File(apk string) *ApkInfoSt {
 	return d
 }
 
+func getLineSeparator() string{
+	if runtime.GOOS == "windows" {
+		return "\r\n"
+	}
+	return "\n"
+}
+
 func parse(c *Conf, apk string) *ApkInfoSt {
 	out, err := exec.Command(c.aapt, "dump", "badging", apk).Output()
 	if err != nil {
@@ -55,7 +64,7 @@ func parse(c *Conf, apk string) *ApkInfoSt {
 		return nil
 	}
 	//log.Printf("apk file - %q\n", apk)
-	data := strings.Split(string(out), "\n")
+	data := strings.Split(string(out), getLineSeparator())
 	info := ApkInfoSt{FilePath:apk}
 	for _, s := range data{
 		arr := strings.Split(s, ":")
