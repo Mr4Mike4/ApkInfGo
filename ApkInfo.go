@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"os"
 	"runtime"
-	"fmt"
 )
 type ApkInfoSt struct {
 	Name string
