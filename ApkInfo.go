@@ -17,6 +17,7 @@ type ApkInfoSt struct {
 	Icon string
 	SdkVersion uint16
 	TargetSdkVersion uint16
+	NativeCode string
 	FileSize int64
 	FilePath string
 	Cert ApkCertSt
@@ -81,6 +82,10 @@ func parse(c *Conf, apk string) *ApkInfoSt {
 			//log.Printf("targetSdkVersion - %q\n", arr[1])
 			targetSdkVersion, _ := strconv.ParseUint(strings.Trim(arr[1], "'"), 0, 16)
 			info.TargetSdkVersion = uint16(targetSdkVersion)
+			break
+		case "native-code":
+			nativeCode := strings.Trim(strings.TrimSpace(arr[1]), "'")
+			info.NativeCode = nativeCode
 			break
 		case "application":
 			//log.Printf("application - %q\n", arr[1])
