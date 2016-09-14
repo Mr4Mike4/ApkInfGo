@@ -5,12 +5,13 @@ import (
 	"os/exec"
 	"strings"
 )
+
 type ApkCertSt struct {
-	CertMD5 string
-	CertSHA1 string
-	CertSHA256 string
+	CertMD5       string
+	CertSHA1      string
+	CertSHA256    string
 	SignAlgorithm string
-	FilePath string
+	FilePath      string
 }
 
 type ConfCert struct {
@@ -18,7 +19,7 @@ type ConfCert struct {
 }
 
 func ApkCertificate(keytoolApp string) *ConfCert {
-	c := &ConfCert{keytool:keytoolApp}
+	c := &ConfCert{keytool: keytoolApp}
 	return c
 }
 
@@ -30,8 +31,8 @@ func (c *ConfCert) File(apk string) *ApkCertSt {
 	}
 	//log.Printf("apk file - %q\n", apk)
 	data := strings.Split(string(out), "\n")
-	cert := ApkCertSt{FilePath:apk}
-	for _, s := range data{
+	cert := ApkCertSt{FilePath: apk}
+	for _, s := range data {
 		arr := strings.Split(s, ": ")
 		if len(arr) != 2 {
 			//log.Printf("error split - %q\n", s)
@@ -55,9 +56,6 @@ func (c *ConfCert) File(apk string) *ApkCertSt {
 			//log.Printf("Signature algorithm name - %q\n", arr[1])
 			cert.SignAlgorithm = arr[1]
 			break
-		//default:
-		//	log.Printf("%q - %q\n", arr[0], arr[1])
-		//	break
 		}
 	}
 	return &cert
