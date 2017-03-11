@@ -119,7 +119,7 @@ func (c *Conf) Folder(dirname string, recurcive bool) *[]ApkInfoSt {
 	}
 	//log.Printf("apk folder - %q\n", dirname)
 	infoArr := make([]ApkInfoSt, 0)
-	re := regexp.MustCompile(".*\\.apk")
+	re := regexp.MustCompile(".*\\.apk$")
 	for _, file := range files {
 		if re.MatchString(file.Name()) {
 			dir := dirname + string(os.PathSeparator) + file.Name()
