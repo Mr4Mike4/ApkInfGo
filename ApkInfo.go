@@ -99,7 +99,7 @@ func parse(c *Conf, apk string) *ApkInfoSt {
 			info.NativeCode = nativeCode
 		case "application":
 			//log.Printf("application - %q\n", arr[1])
-			re2 := regexp.MustCompile("label='([^']+)?' icon='([^']+)?'")
+			re2 := regexp.MustCompile("label='(.*)?' icon='([^']+)?'")
 			d := re2.FindStringSubmatch(arr[1])
 			info.Label = d[1]
 			info.Icon = d[2]
