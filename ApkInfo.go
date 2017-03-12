@@ -67,6 +67,7 @@ func parse(c *Conf, apk string) *ApkInfoSt {
 	//log.Printf("apk file - %q\n", apk)
 	data := strings.Split(string(out), getLineSeparator())
 	info := ApkInfoSt{FilePath: apk}
+	label2 := ""
 	for _, s := range data {
 		arr := strings.Split(s, ":")
 		if len(arr) != 2 {
@@ -83,9 +84,10 @@ func parse(c *Conf, apk string) *ApkInfoSt {
 			versionCode, _ := strconv.ParseUint(packageInfo[2], 0, 32)
 			info.VersionCode = uint32(versionCode)
 		case "launchable-activity":
-			re := regexp.MustCompile("name='([^']+)?'")
+			re := regexp.MustCompile("name='([^']+)?'\\s+label='(.*)?'\\s+icon='([^']*)?'")
 			launchInfo := re.FindStringSubmatch(arr[1])
 			info.LaunchableActivity = launchInfo[1]
+			info.Label = launchInfo[2]
 		case "sdkVersion":
 			//log.Printf("sdkVersion - %q\n", arr[1])
 			sdkVersion, _ := strconv.ParseUint(strings.Trim(arr[1], "'"), 0, 16)
@@ -101,10 +103,15 @@ func parse(c *Conf, apk string) *ApkInfoSt {
 			//log.Printf("application - %q\n", arr[1])
 			re2 := regexp.MustCompile("label='(.*)?' icon='([^']+)?'")
 			d := re2.FindStringSubmatch(arr[1])
-			info.Label = d[1]
+			label2 = d[1]
 			info.Icon = d[2]
 		}
 	}
+	// if label empty
+	if len(info.Label) == 0 {
+		info.Label = label2
+	}
+
 	if c.cert != nil {
 		info.Cert = *c.cert.File(apk)
 	}
